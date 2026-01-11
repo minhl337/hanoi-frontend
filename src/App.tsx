@@ -186,20 +186,44 @@ function App() {
   )
   const [isAnimating, setIsAnimating] = useState<boolean>(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [currentStepIndex, setCurrentStepIndex] = useState<number | null>(null)
 
   const animationRef = useRef<number | null>(null)
   const abortRef = useRef<boolean>(false)
+  const stepRefs = useRef<(HTMLLIElement | null)[]>([])
+
+  // Auto-scroll to current step during animation
+  useEffect(() => {
+    if (currentStepIndex !== null && stepRefs.current[currentStepIndex]) {
+      stepRefs.current[currentStepIndex]?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      })
+    }
+  }, [currentStepIndex])
 
   // Show toast
   const showToast = useCallback((message: string) => {
     setToast(message)
   }, [])
 
-  // Handle n input change
+  // Handle n input change - also resets the board
   const handleNChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10)
     if (!isNaN(value) && value >= 1) {
+      // Stop any running animation
+      abortRef.current = true
+      if (animationRef.current) {
+        clearTimeout(animationRef.current)
+        animationRef.current = null
+      }
+      setIsAnimating(false)
       setN(value)
+      setRods(createInitialState(value))
+      setSelectedRod(null)
+      setStepsText([])
+      setCachedSolution(null)
+      setCurrentStepIndex(null)
     }
   }
 
@@ -215,6 +239,7 @@ function App() {
     setSelectedRod(null)
     setStepsText([])
     setCachedSolution(null)
+    setCurrentStepIndex(null)
   }, [n])
 
   // Handle rod click (manual play)
@@ -236,9 +261,8 @@ function App() {
           // Legal move
           setRods(executeMove(rods, selectedRod, rodName))
           setSelectedRod(null)
-          // Invalidate cache since state changed
-          setCachedSolution(null)
-          setStepsText([])
+          // Keep cachedSolution and stepsText visible so user can follow along
+          // Cache will be checked against current state when Solve/Auto-solve is clicked
         } else {
           // Illegal move
           showToast("Invalid move")
@@ -381,10 +405,17 @@ function App() {
 
     if (moves.length === 0) return
 
-    // Start animation
+    // Start animation - show all steps upfront
     setIsAnimating(true)
     setSelectedRod(null)
     abortRef.current = false
+
+    // Show all steps immediately
+    setStepsText(
+      moves.map(
+        (m) => `Step ${m.step}: Move disk ${m.disk} from ${m.from} to ${m.to}`
+      )
+    )
 
     let currentRods = {
       ...rods,
@@ -394,25 +425,25 @@ function App() {
     }
     let stepIndex = 0
 
+    // Highlight current step during animation
+    setCurrentStepIndex(0)
+
     const animateStep = () => {
       if (abortRef.current || stepIndex >= moves.length) {
         setIsAnimating(false)
+        setCurrentStepIndex(null)
         return
       }
 
       const move = moves[stepIndex]
       currentRods = executeMove(currentRods, move.from, move.to)
       setRods({ ...currentRods })
-      setStepsText((prev) => [
-        ...prev,
-        `Step ${move.step}: Move disk ${move.disk} from ${move.from} to ${move.to}`,
-      ])
+      setCurrentStepIndex(stepIndex)
       stepIndex++
 
       animationRef.current = window.setTimeout(animateStep, ANIMATION_SPEED)
     }
 
-    setStepsText([])
     animateStep()
   }, [isAnimating, rods, n, cachedSolution, callSolveAPI, showToast])
 
@@ -499,7 +530,13 @@ function App() {
 
         {/* Steps Panel */}
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Steps</h2>
+          <div className="flex justify-between">
+            <div className="text-xl font-bold text-gray-800 mb-4">Steps</div>
+            <div className="text-xl font-bold text-gray-800 mb-4">
+              {stepsText.length}
+            </div>
+          </div>
+
           <div className="max-h-64 overflow-y-auto">
             {stepsText.length === 0 ? (
               <p className="text-gray-400 italic">
@@ -509,7 +546,17 @@ function App() {
             ) : (
               <ul className="space-y-1">
                 {stepsText.map((step, idx) => (
-                  <li key={idx} className="text-gray-700 font-mono text-sm">
+                  <li
+                    key={idx}
+                    ref={(el) => (stepRefs.current[idx] = el)}
+                    className={`font-mono text-sm px-2 py-1 rounded ${
+                      currentStepIndex === idx
+                        ? "bg-green-500 text-white font-bold"
+                        : currentStepIndex !== null && idx < currentStepIndex
+                        ? "text-gray-400 line-through"
+                        : "text-gray-700"
+                    }`}
+                  >
                     {step}
                   </li>
                 ))}
