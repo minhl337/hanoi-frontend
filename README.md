@@ -28,7 +28,7 @@ App runs on http://localhost:3000
 | ------------------- | --------------- | ----------------------- |
 | `REACT_APP_API_URL` | Backend API URL | `http://localhost:3001` |
 
-## Deployed to render: `https://hanoi-frontend-mg5x.onrender.com/`
+## Deployed to render: https://hanoi-frontend-mg5x.onrender.com/
 
 ## Scripts
 
