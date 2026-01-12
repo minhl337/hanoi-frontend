@@ -1,14 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react"
 import { Rods, RodName, Move, CachedSolution, SolveResponse } from "./types"
-
-// API URL - uses environment variable for deployment, falls back to localhost
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3001"
-
-// Constants
-const ANIMATION_SPEED = 500 // ms per move
-const MAX_MOVES = 100
-const SUMMARY_MESSAGE =
-  "Too many moves to list or auto-solve. Reduce n to 6 or less."
+import { API_URL, ANIMATION_SPEED, MAX_MOVES, SUMMARY_MESSAGE } from "./config"
 
 // Generate a random color for each disk (seeded by disk number for consistency)
 const diskColors: Record<number, string> = {}
@@ -109,7 +101,7 @@ function Rod({
   const maxDiskWidth = 160 // max width in pixels
   const minDiskWidth = 30
   const diskHeight = 24
-  const rodHeight = (maxN + 1) * diskHeight + 40
+  const rodHeight = (maxN + 1) * diskHeight + 20
 
   return (
     <div
@@ -532,9 +524,11 @@ function App() {
         <div className="bg-white rounded-lg shadow-lg p-6">
           <div className="flex justify-between">
             <div className="text-xl font-bold text-gray-800 mb-4">Steps</div>
-            <div className="text-xl font-bold text-gray-800 mb-4">
-              {stepsText.length}
-            </div>
+            {cachedSolution && (
+              <div className="text-xl font-bold text-gray-800 mb-4">
+                {cachedSolution.moveCount}
+              </div>
+            )}
           </div>
 
           <div className="max-h-64 overflow-y-auto">
