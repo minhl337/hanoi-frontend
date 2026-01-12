@@ -1,5 +1,5 @@
 // Game configuration constants
-export const MAX_DISK = 6
+export const MAX_DISK = 20
 export const MAX_MOVES = 2 ** MAX_DISK - 1 // 2^n - 1 for n disks
 export const ANIMATION_SPEED = 500 // ms per move
 
