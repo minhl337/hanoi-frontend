@@ -20,29 +20,23 @@ App runs on http://localhost:3000
 - **Solve** button - shows solution steps without moving disks
 - **Auto-solve** button - animates the solution (500ms per move)
 - **Reset** button - returns to initial state
-- Supports 1-6 disks for full solutions (n > 6 shows summary only)
+- Supports 20 disks by default but can we changed in config.ts
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable            | Description     | Default                 |
+| ------------------- | --------------- | ----------------------- |
 | `REACT_APP_API_URL` | Backend API URL | `http://localhost:3001` |
 
-## Deploy to Vercel
-
-1. Push this repo to GitHub
-2. Import project on [Vercel](https://vercel.com)
-3. Add environment variable:
-   - `REACT_APP_API_URL` = your Render backend URL (e.g., `https://your-backend.onrender.com`)
-4. Deploy
+## Deployed to render: `https://hanoi-frontend-mg5x.onrender.com/`
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm start` | Start development server |
-| `npm run build` | Create production build |
-| `npm test` | Run tests |
+| Command         | Description              |
+| --------------- | ------------------------ |
+| `npm start`     | Start development server |
+| `npm run build` | Create production build  |
+| `npm test`      | Run tests                |
 
 ## Tech Stack
 
